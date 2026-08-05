@@ -2,6 +2,16 @@
 let qualifyingZipSet = new Set();
 let isZipDataLoaded = false;
 
+/** Canonical ASD diagnosis dropdown values. Anything outside this list is a data fault, not a lead. */
+const RECOGNIZED_DIAGNOSIS_VALUES = [
+    'yes',
+    'no',
+    'no, on a waitlist',
+    'no, have non-asd diagnosis',
+    'no, iep only',
+    'no, evaluation scheduled'
+];
+
 const ZIP_CDN_URL = 'https://cdn.prod.fortahealth.com/assets/zip_code_coverage.json';
 /** Salesforce: Expected Total ABA Hours per Week */
 const EXPECTED_ABA_HOURS_PER_WEEK_FIELD_ID = '00NRc00000NxTLk';
@@ -104,24 +114,17 @@ function ensureExpectedAbaHoursRequired(formSalesEl) {
 }
 
 function thankYouUrlForMqlIntake(formSalesEl, isSpanishLanguage, isInHomeQualifying) {
-    var hours = getExpectedAbaHoursPerWeekValue(formSalesEl);
-    var isHighVolume = !isNaN(hours) && hours >= 15;
     var spanish = !!isSpanishLanguage;
     var inHome = !!isInHomeQualifying;
 
-    if (isHighVolume) {
-        if (inHome) {
-            return spanish
-                ? 'https://www.fortahealth.com/in-home/thank-you-intake-schedule-your-call-spanish'
-                : 'https://www.fortahealth.com/in-home/thank-you-intake-schedule-your-call';
-        }
+    if (inHome) {
         return spanish
-            ? 'https://www.fortahealth.com/es/thank-you-schedule'
-            : 'https://www.fortahealth.com/thank-you-schedule-your-call';
+            ? 'https://www.fortahealth.com/in-home/thank-you-intake-schedule-your-call-spanish'
+            : 'https://www.fortahealth.com/in-home/thank-you-intake-schedule-your-call';
     }
     return spanish
-        ? 'https://www.fortahealth.com/es/thank-you-intake'
-        : 'https://www.fortahealth.com/thank-you-intake-pre-qualified';
+        ? 'https://www.fortahealth.com/es/thank-you-schedule'
+        : 'https://www.fortahealth.com/thank-you-schedule-your-call';
 }
 
 function loadQualifyingZipData() {
@@ -894,7 +897,18 @@ function initializeScript() {
         let returnURL = '';
         let mqlStatus = '';
 
-        if (hasInsurance === 'No') {
+        // Data-integrity guard: the diagnosis dropdown is mandatory on every form, so a blank
+        // value means the page's JS/markup was bypassed. Never let it score as an MQL.
+        if (asdDiagnosis === '') {
+            returnURL = "https://www.fortahealth.com/thank-you-2";
+            mqlStatus = "Bot";
+        }
+        // Present but unrecognized => a dropdown option was renamed out of sync with this file.
+        else if (!RECOGNIZED_DIAGNOSIS_VALUES.includes(asdDiagnosis.toLowerCase())) {
+            returnURL = "https://www.fortahealth.com/thank-you-2";
+            mqlStatus = "DQ - Other";
+        }
+        else if (hasInsurance === 'No') {
             returnURL = "https://www.fortahealth.com/thank-you-2";
             mqlStatus = "DQ - No Insurance";
         }
@@ -920,11 +934,11 @@ function initializeScript() {
             mqlStatus = "DQ - No Diagnosis";
         }
         else if (isInHomePassing) {
-            returnURL = thankYouUrlForMqlIntake(formSales, isSpanishLanguage, isQualifyingZip);
+            returnURL = thankYouUrlForMqlIntake(formSales, isSpanishLanguage, isInHomePassing);
             mqlStatus = "MQL - In-Home";
         }
         else if (asdDiagnosis.toLowerCase() === "yes" && tofuStatus === "Passing") {
-            returnURL = thankYouUrlForMqlIntake(formSales, isSpanishLanguage, isQualifyingZip);
+            returnURL = thankYouUrlForMqlIntake(formSales, isSpanishLanguage, isInHomePassing);
             mqlStatus = "MQL";
         }
         else if (tofuStatus === "Disqualify") {
@@ -932,7 +946,7 @@ function initializeScript() {
             mqlStatus = "DQ - Insurance not supported";
         }
         else if (tofuStatus === "Passing") {
-            returnURL = thankYouUrlForMqlIntake(formSales, isSpanishLanguage, isQualifyingZip);
+            returnURL = thankYouUrlForMqlIntake(formSales, isSpanishLanguage, isInHomePassing);
             mqlStatus = "MQL";
         }
         else if (
