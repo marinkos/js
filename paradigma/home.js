@@ -1,11 +1,11 @@
 /*--- Horizontal scroll (homepage) ---*/
 (function () {
-  let signaled = false;
-
-  function ready() {
-    if (signaled) return;
-    signaled = true;
+  function signalReady() {
+    window.__paradigmaHscrollReady = true;
     window.dispatchEvent(new Event("paradigma:hscroll-ready"));
+    if (typeof window.__paradigmaInitEffects === "function") {
+      window.__paradigmaInitEffects();
+    }
   }
 
   function init() {
@@ -18,7 +18,7 @@
     const list = document.querySelector(".hscroll_list");
 
     if (!component || !list || reduceMotion) {
-      ready();
+      signalReady();
       return;
     }
 
@@ -42,12 +42,12 @@
         },
         (context) => {
           if (context.conditions.mobile) {
-            ready();
+            signalReady();
             return;
           }
 
           const getScrollDistance = () =>
-            list.scrollWidth - component.offsetWidth;
+            Math.max(0, list.scrollWidth - component.offsetWidth);
 
           const tween = gsap.to(list, {
             x: () => -getScrollDistance(),
@@ -55,20 +55,26 @@
             scrollTrigger: {
               trigger: component,
               start: "top top",
-              end: () => `+=${getScrollDistance()}`,
+              end: () => "+=" + getScrollDistance(),
               scrub: 0.5,
               pin: true,
+              pinSpacing: true,
               anticipatePin: 1,
               invalidateOnRefresh: true,
             },
           });
 
-          // Pin spacer is in the layout — tell global.js to create fade/reveal now
+          // Wait 2 frames so pin-spacer is in the layout, then unlock effects
           ScrollTrigger.refresh();
-          ready();
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              ScrollTrigger.refresh();
+              signalReady();
+            });
+          });
 
           return () => {
-            tween.scrollTrigger && tween.scrollTrigger.kill();
+            if (tween.scrollTrigger) tween.scrollTrigger.kill();
             tween.kill();
           };
         }

@@ -6,13 +6,25 @@
     "(prefers-reduced-motion: reduce)"
   ).matches;
 
+  let inited = false;
+
+  function setInitialState() {
+    if (reduceMotion) return;
+
+    const fadeEls = document.querySelectorAll("[data-fade]");
+    if (fadeEls.length) gsap.set(fadeEls, { autoAlpha: 0, y: 64 });
+
+    const revealEls = document.querySelectorAll("[data-reveal]");
+    if (revealEls.length) gsap.set(revealEls, { autoAlpha: 0 });
+  }
+
   function initReveal() {
     const elements = document.querySelectorAll("[data-reveal]");
-    if (!elements.length) return;
+    if (!elements.length) return Promise.resolve();
 
     if (reduceMotion) {
       elements.forEach((el) => gsap.set(el, { autoAlpha: 1 }));
-      return;
+      return Promise.resolve();
     }
 
     return document.fonts.ready.then(() => {
@@ -43,59 +55,65 @@
     if (!fadeEls.length) return;
 
     if (reduceMotion) {
-      gsap.set(fadeEls, { autoAlpha: 1 });
+      gsap.set(fadeEls, { autoAlpha: 1, y: 0, scale: 1 });
       return;
     }
 
-    gsap.set(fadeEls, { autoAlpha: 0, y: 24 });
-
     fadeEls.forEach((el) => {
-      ScrollTrigger.create({
-        trigger: el,
-        start: "top 85%",
-        invalidateOnRefresh: true,
-        onEnter: () =>
-          gsap.to(el, {
-            autoAlpha: 1,
-            y: 0,
-            duration: 1.2,
-            ease: "power2.out",
-            overwrite: true,
-          }),
-        onLeaveBack: () =>
-          gsap.to(el, {
-            autoAlpha: 0,
-            y: 24,
-            duration: 0.6,
-            ease: "power1.in",
-            overwrite: true,
-          }),
-      });
+      gsap.fromTo(
+        el,
+        { autoAlpha: 0, y: 64, scale: 0.97 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          scale: 1,
+          duration: 1.6,
+          ease: "power3.out",
+          overwrite: "auto",
+          scrollTrigger: {
+            trigger: el,
+            start: "top 90%",
+            toggleActions: "play none none reverse",
+            invalidateOnRefresh: true,
+          },
+        }
+      );
     });
   }
 
-  let started = false;
-
-  function start() {
-    if (started) return;
-    started = true;
+  function initEffects() {
+    if (inited) return;
+    inited = true;
 
     Promise.resolve(initReveal()).then(() => {
       initFade();
+      ScrollTrigger.sort();
       ScrollTrigger.refresh();
     });
   }
 
+  // Expose so home.js can kick this off after the pin exists
+  window.__paradigmaInitEffects = initEffects;
+
   function boot() {
-    // If the homepage pin exists, wait until home.js finishes setting it up
-    // so fade/reveal start positions include the pin spacer.
-    if (document.querySelector(".hscroll_component")) {
-      window.addEventListener("paradigma:hscroll-ready", start, { once: true });
-      // Fallback if home.js is missing on a page that still has the markup
-      setTimeout(start, 3000);
+    setInitialState();
+
+    const hasHscroll = !!document.querySelector(".hscroll_component");
+
+    if (!hasHscroll) {
+      initEffects();
       return;
     }
-    start();
+
+    // Pin may already be ready if home.js finished first
+    if (window.__paradigmaHscrollReady) {
+      initEffects();
+      return;
+    }
+
+    window.addEventListener("paradigma:hscroll-ready", initEffects, {
+      once: true,
+    });
   }
 
   if (document.readyState === "loading") {
