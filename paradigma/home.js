@@ -1,19 +1,64 @@
-/*--- Horizontal scroll (homepage) ---*/
+/*--- Horizontal scroll + data-slide (homepage) ---*/
 (function () {
+  const reduceMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+
+  let slidesInited = false;
+
+  function setSlideInitial() {
+    const els = document.querySelectorAll("[data-slide]");
+    if (!els.length || reduceMotion) return;
+    gsap.set(els, { x: "60vw" });
+  }
+
+  function initSlides() {
+    if (slidesInited) return;
+    slidesInited = true;
+
+    const els = document.querySelectorAll("[data-slide]");
+    if (!els.length) return;
+
+    if (reduceMotion) {
+      gsap.set(els, { x: 0 });
+      return;
+    }
+
+    els.forEach((el) => {
+      gsap.fromTo(
+        el,
+        { x: "60vw" },
+        {
+          x: 0,
+          duration: 2.4,
+          ease: "power3.out",
+          overwrite: "auto",
+          scrollTrigger: {
+            trigger: el,
+            start: "top 85%",
+            toggleActions: "play none none reverse",
+            invalidateOnRefresh: true,
+          },
+        }
+      );
+    });
+
+    ScrollTrigger.refresh();
+  }
+
   function signalReady() {
     window.__paradigmaHscrollReady = true;
     window.dispatchEvent(new Event("paradigma:hscroll-ready"));
     if (typeof window.__paradigmaInitEffects === "function") {
       window.__paradigmaInitEffects();
     }
+    initSlides();
   }
 
   function init() {
     gsap.registerPlugin(ScrollTrigger);
+    setSlideInitial();
 
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
     const component = document.querySelector(".hscroll_component");
     const list = document.querySelector(".hscroll_list");
 
