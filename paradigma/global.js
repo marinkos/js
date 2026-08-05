@@ -55,19 +55,18 @@
     if (!fadeEls.length) return;
 
     if (reduceMotion) {
-      gsap.set(fadeEls, { autoAlpha: 1, y: 0, scale: 1 });
+      gsap.set(fadeEls, { autoAlpha: 1, y: 0 });
       return;
     }
 
     fadeEls.forEach((el) => {
       gsap.fromTo(
         el,
-        { autoAlpha: 0, y: 64, scale: 0.97 },
+        { autoAlpha: 0, y: 64 },
         {
           autoAlpha: 1,
           y: 0,
-          scale: 1,
-          duration: 1.6,
+          duration: 2.2,
           ease: "power3.out",
           overwrite: "auto",
           scrollTrigger: {
