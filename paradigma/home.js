@@ -9,7 +9,7 @@
   function setSlideInitial() {
     const els = document.querySelectorAll("[data-slide]");
     if (!els.length || reduceMotion) return;
-    gsap.set(els, { x: "60vw" });
+    gsap.set(els, { x: "30vw" });
   }
 
   function initSlides() {
@@ -27,10 +27,10 @@
     els.forEach((el) => {
       gsap.fromTo(
         el,
-        { x: "60vw" },
+        { x: "30vw" },
         {
           x: 0,
-          duration: 2.4,
+          duration: 1.5,
           ease: "power3.out",
           overwrite: "auto",
           scrollTrigger: {
