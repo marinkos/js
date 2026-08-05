@@ -1,13 +1,13 @@
-/*--- Text Reveal ---*/
+/*--- Text Reveal + Fade In ---*/
 (function () {
-  function init() {
-    gsap.registerPlugin(ScrollTrigger, SplitText);
+  gsap.registerPlugin(ScrollTrigger, SplitText);
 
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
+  const reduceMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+
+  function initReveal() {
     const elements = document.querySelectorAll("[data-reveal]");
-
     if (!elements.length) return;
 
     if (reduceMotion) {
@@ -15,7 +15,7 @@
       return;
     }
 
-    document.fonts.ready.then(() => {
+    return document.fonts.ready.then(() => {
       elements.forEach((el) => {
         const split = new SplitText(el, { type: "chars, words" });
 
@@ -35,28 +35,11 @@
           },
         });
       });
-
-      ScrollTrigger.refresh();
     });
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-})();
-
-/*--- Fade In ---*/
-(function () {
-  function init() {
-    gsap.registerPlugin(ScrollTrigger);
-
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
+  function initFade() {
     const fadeEls = document.querySelectorAll("[data-fade]");
-
     if (!fadeEls.length) return;
 
     if (reduceMotion) {
@@ -66,8 +49,6 @@
 
     gsap.set(fadeEls, { autoAlpha: 0, y: 24 });
 
-    // Individual triggers (not batch) so pin spacing from home.js
-    // is recalculated correctly on ScrollTrigger.refresh().
     fadeEls.forEach((el) => {
       ScrollTrigger.create({
         trigger: el,
@@ -91,13 +72,35 @@
           }),
       });
     });
+  }
 
-    ScrollTrigger.refresh();
+  let started = false;
+
+  function start() {
+    if (started) return;
+    started = true;
+
+    Promise.resolve(initReveal()).then(() => {
+      initFade();
+      ScrollTrigger.refresh();
+    });
+  }
+
+  function boot() {
+    // If the homepage pin exists, wait until home.js finishes setting it up
+    // so fade/reveal start positions include the pin spacer.
+    if (document.querySelector(".hscroll_component")) {
+      window.addEventListener("paradigma:hscroll-ready", start, { once: true });
+      // Fallback if home.js is missing on a page that still has the markup
+      setTimeout(start, 3000);
+      return;
+    }
+    start();
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
+    document.addEventListener("DOMContentLoaded", boot);
   } else {
-    init();
+    boot();
   }
 })();

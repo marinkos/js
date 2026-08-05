@@ -1,5 +1,13 @@
 /*--- Horizontal scroll (homepage) ---*/
 (function () {
+  let signaled = false;
+
+  function ready() {
+    if (signaled) return;
+    signaled = true;
+    window.dispatchEvent(new Event("paradigma:hscroll-ready"));
+  }
+
   function init() {
     gsap.registerPlugin(ScrollTrigger);
 
@@ -9,7 +17,10 @@
     const component = document.querySelector(".hscroll_component");
     const list = document.querySelector(".hscroll_list");
 
-    if (!component || !list || reduceMotion) return;
+    if (!component || !list || reduceMotion) {
+      ready();
+      return;
+    }
 
     const images = list.querySelectorAll("img");
 
@@ -24,32 +35,44 @@
     ).then(() => {
       const mm = gsap.matchMedia();
 
-      mm.add("(min-width: 768px)", () => {
-        const getScrollDistance = () =>
-          list.scrollWidth - component.offsetWidth;
+      mm.add(
+        {
+          desktop: "(min-width: 768px)",
+          mobile: "(max-width: 767px)",
+        },
+        (context) => {
+          if (context.conditions.mobile) {
+            ready();
+            return;
+          }
 
-        const tween = gsap.to(list, {
-          x: () => -getScrollDistance(),
-          ease: "none",
-          scrollTrigger: {
-            trigger: component,
-            start: "top top",
-            end: () => `+=${getScrollDistance()}`,
-            scrub: 0.5,
-            pin: true,
-            invalidateOnRefresh: true,
-          },
-        });
+          const getScrollDistance = () =>
+            list.scrollWidth - component.offsetWidth;
 
-        // Recalculate fade/reveal triggers from global.js now that
-        // the pin spacer exists and pushes content below downward.
-        ScrollTrigger.refresh();
+          const tween = gsap.to(list, {
+            x: () => -getScrollDistance(),
+            ease: "none",
+            scrollTrigger: {
+              trigger: component,
+              start: "top top",
+              end: () => `+=${getScrollDistance()}`,
+              scrub: 0.5,
+              pin: true,
+              anticipatePin: 1,
+              invalidateOnRefresh: true,
+            },
+          });
 
-        return () => {
-          tween.scrollTrigger && tween.scrollTrigger.kill();
-          tween.kill();
-        };
-      });
+          // Pin spacer is in the layout — tell global.js to create fade/reveal now
+          ScrollTrigger.refresh();
+          ready();
+
+          return () => {
+            tween.scrollTrigger && tween.scrollTrigger.kill();
+            tween.kill();
+          };
+        }
+      );
     });
   }
 
