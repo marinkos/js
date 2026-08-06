@@ -1,4 +1,4 @@
-/*--- Text Reveal + Fade In ---*/
+/*--- Text Reveal + Fade In + Slide In ---*/
 (function () {
   gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -16,6 +16,9 @@
 
     const revealEls = document.querySelectorAll("[data-reveal]");
     if (revealEls.length) gsap.set(revealEls, { autoAlpha: 0 });
+
+    const slideEls = document.querySelectorAll("[data-slide]");
+    if (slideEls.length) gsap.set(slideEls, { x: "30vw" });
   }
 
   function initReveal() {
@@ -80,12 +83,42 @@
     });
   }
 
+  function initSlide() {
+    const slideEls = document.querySelectorAll("[data-slide]");
+    if (!slideEls.length) return;
+
+    if (reduceMotion) {
+      gsap.set(slideEls, { x: 0 });
+      return;
+    }
+
+    slideEls.forEach((el) => {
+      gsap.fromTo(
+        el,
+        { x: "30vw" },
+        {
+          x: 0,
+          duration: 1.5,
+          ease: "power3.out",
+          overwrite: "auto",
+          scrollTrigger: {
+            trigger: el,
+            start: "top 85%",
+            toggleActions: "play none none reverse",
+            invalidateOnRefresh: true,
+          },
+        }
+      );
+    });
+  }
+
   function initEffects() {
     if (inited) return;
     inited = true;
 
     Promise.resolve(initReveal()).then(() => {
       initFade();
+      initSlide();
       ScrollTrigger.sort();
       ScrollTrigger.refresh();
     });

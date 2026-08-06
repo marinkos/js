@@ -1,50 +1,8 @@
-/*--- Horizontal scroll + data-slide (homepage) ---*/
+/*--- Horizontal scroll (homepage) ---*/
 (function () {
   const reduceMotion = window.matchMedia(
     "(prefers-reduced-motion: reduce)"
   ).matches;
-
-  let slidesInited = false;
-
-  function setSlideInitial() {
-    const els = document.querySelectorAll("[data-slide]");
-    if (!els.length || reduceMotion) return;
-    gsap.set(els, { x: "30vw" });
-  }
-
-  function initSlides() {
-    if (slidesInited) return;
-    slidesInited = true;
-
-    const els = document.querySelectorAll("[data-slide]");
-    if (!els.length) return;
-
-    if (reduceMotion) {
-      gsap.set(els, { x: 0 });
-      return;
-    }
-
-    els.forEach((el) => {
-      gsap.fromTo(
-        el,
-        { x: "30vw" },
-        {
-          x: 0,
-          duration: 1.5,
-          ease: "power3.out",
-          overwrite: "auto",
-          scrollTrigger: {
-            trigger: el,
-            start: "top 85%",
-            toggleActions: "play none none reverse",
-            invalidateOnRefresh: true,
-          },
-        }
-      );
-    });
-
-    ScrollTrigger.refresh();
-  }
 
   function signalReady() {
     window.__paradigmaHscrollReady = true;
@@ -52,12 +10,10 @@
     if (typeof window.__paradigmaInitEffects === "function") {
       window.__paradigmaInitEffects();
     }
-    initSlides();
   }
 
   function init() {
     gsap.registerPlugin(ScrollTrigger);
-    setSlideInitial();
 
     const component = document.querySelector(".hscroll_component");
     const list = document.querySelector(".hscroll_list");
