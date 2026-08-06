@@ -78,52 +78,38 @@
             })
       )
     ).then(() => {
-      const mm = gsap.matchMedia();
+      const getScrollDistance = () =>
+        Math.max(0, list.scrollWidth - component.offsetWidth);
 
-      mm.add(
-        {
-          desktop: "(min-width: 768px)",
-          mobile: "(max-width: 767px)",
+      // Skip pin if there's nothing to scroll horizontally
+      if (getScrollDistance() <= 0) {
+        signalReady();
+        return;
+      }
+
+      gsap.to(list, {
+        x: () => -getScrollDistance(),
+        ease: "none",
+        scrollTrigger: {
+          trigger: component,
+          start: "top top",
+          end: () => "+=" + getScrollDistance(),
+          scrub: 0.5,
+          pin: true,
+          pinSpacing: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
         },
-        (context) => {
-          if (context.conditions.mobile) {
-            signalReady();
-            return;
-          }
+      });
 
-          const getScrollDistance = () =>
-            Math.max(0, list.scrollWidth - component.offsetWidth);
-
-          const tween = gsap.to(list, {
-            x: () => -getScrollDistance(),
-            ease: "none",
-            scrollTrigger: {
-              trigger: component,
-              start: "top top",
-              end: () => "+=" + getScrollDistance(),
-              scrub: 0.5,
-              pin: true,
-              pinSpacing: true,
-              anticipatePin: 1,
-              invalidateOnRefresh: true,
-            },
-          });
-
-          // Wait 2 frames so pin-spacer is in the layout, then unlock effects
+      // Wait 2 frames so pin-spacer is in the layout, then unlock effects
+      ScrollTrigger.refresh();
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
           ScrollTrigger.refresh();
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              ScrollTrigger.refresh();
-              signalReady();
-            });
-          });
-
-          return () => {
-            if (tween.scrollTrigger) tween.scrollTrigger.kill();
-            tween.kill();
-          };
-        }
-      );
+          signalReady();
+        });
+      });
     });
   }
 
