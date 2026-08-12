@@ -1,0 +1,4 @@
+/* Hide "Open Positions (n)" heading */
+.ashby-job-board-heading {
+  display: none !important;
+}
