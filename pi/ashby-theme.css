@@ -1,4 +1,343 @@
-/* Hide "Open Positions (n)" heading */
+/* Pi Security · Ashby job board theme
+   Preview locally via pi/preview.html, then upload in Ashby Admin → Theme. */
+
+/* -------------------------------------------------------------------------- */
+/* Fonts (from pi.security Webflow CDN)                                       */
+/* -------------------------------------------------------------------------- */
+
+@font-face {
+  font-family: "YTF millie";
+  src: url("https://cdn.prod.website-files.com/6a1d76b4779db0754b2f6700/6a1d96f163c138f3a6d83bdc_YTFMillie-Light.woff2")
+    format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "YTF millie";
+  src: url("https://cdn.prod.website-files.com/6a1d76b4779db0754b2f6700/6a1d96f167b7a6eccd2bafb7_YTFMillie-Regular.otf")
+    format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "YTF millie";
+  src: url("https://cdn.prod.website-files.com/6a1d76b4779db0754b2f6700/6a1d96f10bd6a7593c6e990a_YTFMillie-Medium.woff2")
+    format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "YTF millie";
+  src: url("https://cdn.prod.website-files.com/6a1d76b4779db0754b2f6700/6a1d96f1cb9e266c4da23608_YTFMillie-Bold.woff2")
+    format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "YTF millie mono";
+  src: url("https://cdn.prod.website-files.com/6a1d76b4779db0754b2f6700/6a1d971ac1968c05025d8b5c_YTFMillieMono-Regular.woff2")
+    format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "YTF millie mono";
+  src: url("https://cdn.prod.website-files.com/6a1d76b4779db0754b2f6700/6a1d971a4766a5b327730ea0_YTFMillieMono-Medium.woff2")
+    format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "YTF giong";
+  src: url("https://cdn.prod.website-files.com/6a1d76b4779db0754b2f6700/6a1d96b2a1da4d6dc85c8f00_YTFGiong-Roman.woff2")
+    format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "YTF giong";
+  src: url("https://cdn.prod.website-files.com/6a1d76b4779db0754b2f6700/6a1d96b2ae2504c1c22b9099_YTFGiong-Italic.woff2")
+    format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Ashby theme tokens                                                         */
+/* -------------------------------------------------------------------------- */
+
+:root {
+  --fontFamily: "YTF millie", Arial, sans-serif;
+}
+
+/* Hide Ashby's built-in "Open Positions (n)" — page already has "Open roles" */
 .ashby-job-board-heading {
   display: none !important;
+}
+
+/* Hide department section headings (Engineering, Product, Security, …) */
+.ashby-department-heading {
+  display: none !important;
+}
+
+/* Space between cards (and between department groups once headings are hidden) */
+.ashby-job-posting-brief-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* 24px */
+  margin: 0 0 1rem;
+  padding: 0;
+}
+
+.ashby-job-posting-brief-list:last-child {
+  margin-bottom: 0;
+}
+
+.ashby-job-posting-brief-list > a {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Body / defaults */
+body,
+.ashby-job-posting-brief-details,
+.ashby-job-board-filter,
+.ashby-application-form-container {
+  font-family: "YTF millie", Arial, sans-serif;
+}
+
+/* Department headings — match site display face */
+.ashby-department-heading,
+.ashby-department-heading-level,
+.ashby-job-posting-heading,
+.ashby-job-posting-brief-department-heading,
+.ashby-job-posting-brief-department-heading-level {
+  font-family: "YTF giong", Arial, sans-serif;
+  font-weight: 400;
+}
+
+/* Job card */
+.ashby-job-posting-brief {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* 24px */
+  padding: 3.5rem 1.75rem; /* 56px 28px — top/bottom 2× left/right */
+  border-radius: 0.625rem; /* 10px */
+  background: #f0f7ff;
+  box-shadow:
+    0 0.5759rem 0.2215rem 0 rgba(58, 90, 248, 0.01), /* 9.214px 3.544px */
+    0 0.3544rem 0.2215rem 0 rgba(58, 90, 248, 0.01), /* 5.67px 3.544px */
+    0 0.1329rem 0.1329rem 0 rgba(58, 90, 248, 0.03), /* 2.126px 2.126px */
+    0 0.0443rem 0.0886rem 0 rgba(58, 90, 248, 0.05), /* 0.709px 1.417px */
+    0 0.1772rem 0.0886rem 0 rgba(49, 99, 143, 0.25), /* 2.835px 1.417px */
+    0 0.0886rem 1.3438rem 0 rgba(0, 178, 255, 0.1); /* 1.417px 21.5px */
+  font-family: "YTF millie", Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+/* Job titles */
+.ashby-job-posting-brief-title {
+  color: #001d3f;
+  font-family: "YTF giong", Arial, sans-serif;
+  font-size: 2rem; /* 32px */
+  font-style: normal;
+  font-weight: 400;
+  line-height: 100%; /* 32px */
+  margin: 0;
+}
+
+/* Meta line under titles */
+.ashby-job-posting-brief-details {
+  color: #001d3f;
+  text-align: left;
+  font-family: "YTF millie mono", Arial, sans-serif;
+  font-size: 0.6875rem; /* 11px */
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.0756rem; /* 1.21px */
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.ashby-job-posting-brief-details p {
+  margin: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  text-align: inherit;
+  line-height: inherit;
+}
+
+/* Primary buttons — Apply / Submit / Back / Upload */
+.ashby-job-board-back-to-all-jobs-button,
+.ashby-application-form-submit-button,
+.ashby-job-posting-description-container > a > button,
+.ashby-application-form-autofill-pane button,
+.ashby-application-form-field-entry[data-field-path="_systemfield_resume"] button,
+button[class*="_primary_"] {
+  background-color: #00ccd3;
+  color: #fefefe;
+  font-family: "YTF millie mono", Arial, sans-serif;
+  font-size: 0.875rem; /* 14px */
+  line-height: 1em;
+  text-align: center;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  font-weight: 500;
+  border: 0;
+  border-radius: 0.25rem; /* 4px */
+  padding: 0.75rem 1.125rem; /* 12px 18px */
+  transition: background-color 0.4s;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.ashby-job-board-back-to-all-jobs-button:hover,
+.ashby-application-form-submit-button:hover,
+.ashby-job-posting-description-container > a > button:hover,
+.ashby-application-form-autofill-pane button:hover,
+.ashby-application-form-field-entry[data-field-path="_systemfield_resume"] button:hover,
+button[class*="_primary_"]:hover {
+  background-color: #01ad9e;
+}
+
+/* Job description body */
+.ashby-job-posting-description h1 {
+  font-family: "YTF giong", Arial, sans-serif;
+  font-size: 2rem; /* 32px */
+  font-weight: 400;
+}
+
+.ashby-job-posting-description h2 {
+  font-family: "YTF giong", Arial, sans-serif;
+  font-size: 1.5rem; /* 24px */
+  font-weight: 400;
+  color: #ff7329;
+}
+
+.ashby-job-posting-description a {
+  color: #01ad9e;
+  transition: color 0.4s;
+}
+
+.ashby-job-posting-description a:hover {
+  color: #01a295;
+}
+
+.ashby-job-posting-description p,
+.ashby-job-posting-description li {
+  color: rgba(33, 39, 42, 0.7);
+}
+
+/* Overview / Application tabs */
+.ashby-job-posting-right-pane-tab-slider {
+  background-color: #00ccd3;
+}
+
+a[aria-selected="true"] .ashby-job-posting-right-pane-overview-tab,
+a[aria-selected="true"] .ashby-job-posting-right-pane-application-tab,
+a[aria-current="page"] .ashby-job-posting-right-pane-overview-tab,
+a[aria-current="page"] .ashby-job-posting-right-pane-application-tab,
+a[class*="_active_"] .ashby-job-posting-right-pane-overview-tab,
+a[class*="_active_"] .ashby-job-posting-right-pane-application-tab {
+  color: #00ccd3;
+}
+
+/* Application form */
+.ashby-application-form-question-title {
+  margin-bottom: 0.25rem;
+  font-family: "YTF millie", Arial, sans-serif;
+  font-size: 0.875rem; /* 14px */
+  font-weight: 400;
+  color: rgba(33, 39, 42, 0.7);
+}
+
+.ashby-application-form-field-entry input[type="text"],
+.ashby-application-form-field-entry input[type="email"],
+.ashby-application-form-field-entry input[type="tel"],
+.ashby-application-form-field-entry input[type="url"],
+.ashby-application-form-field-entry input[type="number"],
+.ashby-application-form-field-entry input:not([type]),
+.ashby-application-form-field-entry textarea,
+.ashby-application-form-field-entry select,
+.ashby-application-form-container input[type="text"],
+.ashby-application-form-container input[type="email"],
+.ashby-application-form-container input[type="tel"],
+.ashby-application-form-container input[type="url"],
+.ashby-application-form-container input[type="number"],
+.ashby-application-form-container textarea,
+.ashby-application-form-container select {
+  border: 1px solid #dfdfdb;
+  border-radius: 0.25rem; /* 4px */
+  box-sizing: border-box;
+}
+
+/* Autofill pane + Resume upload field */
+.ashby-application-form-autofill-pane,
+.ashby-application-form-field-entry[data-field-path="_systemfield_resume"] {
+  background: linear-gradient(180deg, #f1fdff 0%, #f0f7ff 100%), #fff;
+  border-radius: 0.5rem; /* 8px */
+  box-shadow:
+    0 0.5759rem 0.2215rem 0 rgba(58, 90, 248, 0.01), /* 9.214px 3.544px */
+    0 0.3544rem 0.2215rem 0 rgba(58, 90, 248, 0.05), /* 5.67px 3.544px */
+    0 0.1329rem 0.1329rem 0 rgba(58, 90, 248, 0.09), /* 2.126px 2.126px */
+    0 0.0443rem 0.0886rem 0 rgba(58, 90, 248, 0.1), /* 0.709px 1.417px */
+    0 0.1772rem 0.0886rem 0 rgba(49, 99, 143, 0.25), /* 2.835px 1.417px */
+    0 0.0886rem 1.3438rem 0 rgba(0, 178, 255, 0.2); /* 1.417px 21.5px */
+  box-sizing: border-box;
+  padding: 1.25rem; /* 20px */
+}
+
+.ashby-application-form-autofill-input-title {
+  font-family: "YTF giong", Arial, sans-serif;
+  font-size: 1.5rem; /* 24px */
+  font-weight: 400;
+  margin: 0;
+}
+
+.ashby-application-form-field-entry[data-field-path="_systemfield_resume"]
+  .ashby-application-form-question-title {
+  font-family: "YTF millie", Arial, sans-serif;
+  font-size: 1rem; /* 16px */
+  font-weight: 500;
+  color: #001d3f;
+}
+
+/* Yes / No option buttons */
+[class*="_yesno_"] button[class*="_option_"] {
+  border: 1px solid #dfdfdb;
+  border-radius: 0.25rem; /* 4px */
+  background-color: #fff;
+  color: #001d3f;
+  cursor: pointer;
+  transition: border-color 0.4s, background-color 0.4s, color 0.4s;
+  box-sizing: border-box;
+}
+
+[class*="_yesno_"] button[class*="_option_"]:hover {
+  border-color: #00ccd3;
+}
+
+[class*="_yesno_"] button[class*="_option_"][class*="_active_"] {
+  border-color: #00ccd3;
+  background-color: #00ccd3;
+  color: #fefefe;
 }
