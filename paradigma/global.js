@@ -7,6 +7,72 @@
   ).matches;
 
   let inited = false;
+  let refreshQueued = false;
+  let lastHeight = 0;
+
+  // Mobile browsers fire resize when the address bar hides; refreshing there
+  // fights the scroll instead of fixing anything.
+  ScrollTrigger.config({ ignoreMobileResize: true });
+
+  function gsapAtLeast(major, minor) {
+    const parts = String(gsap.version || "0.0").split(".");
+    const currentMajor = parseInt(parts[0], 10) || 0;
+    const currentMinor = parseInt(parts[1], 10) || 0;
+    return (
+      currentMajor > major || (currentMajor === major && currentMinor >= minor)
+    );
+  }
+
+  // clamp() keeps a start/end from landing outside the scrollable range, so
+  // elements near the page bottom still fire. Added in GSAP 3.12.
+  const supportsClamp = gsapAtLeast(3, 12);
+
+  function clamp(position) {
+    return supportsClamp ? "clamp(" + position + ")" : position;
+  }
+
+  function scheduleRefresh() {
+    if (refreshQueued) return;
+    refreshQueued = true;
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        refreshQueued = false;
+        ScrollTrigger.refresh();
+        lastHeight = document.documentElement.scrollHeight;
+      });
+    });
+  }
+
+  // Trigger positions are measured once and cached. Anything that changes page
+  // height afterwards (lazy images, font swap, CMS embeds) leaves every trigger
+  // below it pointing at a stale scroll position, so remeasure when that happens.
+  function watchLayoutShifts() {
+    lastHeight = document.documentElement.scrollHeight;
+
+    window.addEventListener("load", scheduleRefresh);
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(scheduleRefresh);
+    }
+
+    document.querySelectorAll("img").forEach((img) => {
+      if (img.complete) return;
+      img.addEventListener("load", scheduleRefresh, { once: true });
+      img.addEventListener("error", scheduleRefresh, { once: true });
+    });
+
+    if (typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver(() => {
+      const height = document.documentElement.scrollHeight;
+      if (Math.abs(height - lastHeight) < 2) return;
+      lastHeight = height;
+      scheduleRefresh();
+    });
+
+    observer.observe(document.body);
+  }
 
   function setInitialState() {
     if (reduceMotion) return;
@@ -43,8 +109,8 @@
           ease: "none",
           scrollTrigger: {
             trigger: el,
-            start: "top 80%",
-            end: "top 30%",
+            start: clamp("top 80%"),
+            end: clamp("top 30%"),
             scrub: 0.3,
             invalidateOnRefresh: true,
           },
@@ -74,7 +140,7 @@
           overwrite: "auto",
           scrollTrigger: {
             trigger: el,
-            start: "top 90%",
+            start: clamp("top 90%"),
             toggleActions: "play none none none",
             invalidateOnRefresh: true,
           },
@@ -103,7 +169,7 @@
           overwrite: "auto",
           scrollTrigger: {
             trigger: el,
-            start: "top 85%",
+            start: clamp("top 85%"),
             toggleActions: "play none none none",
             invalidateOnRefresh: true,
           },
@@ -129,6 +195,7 @@
 
   function boot() {
     setInitialState();
+    watchLayoutShifts();
 
     const hasHscroll = !!document.querySelector(".hscroll_component");
 
