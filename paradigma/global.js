@@ -8,39 +8,6 @@
 
   let inited = false;
 
-  const STAGGER = 0.12;
-
-  // Elements sharing a parent animate together as one staggered batch,
-  // triggered by whichever of them enters the viewport first.
-  function groupSiblings(nodeList) {
-    const groups = [];
-    const byParent = new Map();
-
-    nodeList.forEach((el) => {
-      const parent = el.parentElement;
-      if (!parent) {
-        groups.push([el]);
-        return;
-      }
-      let group = byParent.get(parent);
-      if (!group) {
-        group = [];
-        byParent.set(parent, group);
-        groups.push(group);
-      }
-      group.push(el);
-    });
-
-    return groups;
-  }
-
-  function staggerFor(group) {
-    if (group.length < 2) return 0;
-    const override = group[0].getAttribute("data-stagger");
-    const parsed = override === null ? NaN : parseFloat(override);
-    return isNaN(parsed) ? STAGGER : parsed;
-  }
-
   function setInitialState() {
     if (reduceMotion) return;
 
@@ -95,21 +62,20 @@
       return;
     }
 
-    groupSiblings(fadeEls).forEach((group) => {
+    fadeEls.forEach((el) => {
       gsap.fromTo(
-        group,
+        el,
         { autoAlpha: 0, y: 64 },
         {
           autoAlpha: 1,
           y: 0,
-          duration: 1,
-          ease: "power3.out",
-          stagger: staggerFor(group),
+          duration: 1.1,
+          ease: "power2.out",
           overwrite: "auto",
           scrollTrigger: {
-            trigger: group[0],
+            trigger: el,
             start: "top 90%",
-            once: true,
+            toggleActions: "play none none none",
             invalidateOnRefresh: true,
           },
         }
@@ -126,21 +92,19 @@
       return;
     }
 
-    groupSiblings(slideEls).forEach((group) => {
+    slideEls.forEach((el) => {
       gsap.fromTo(
-        group,
+        el,
         { x: "30vw" },
         {
           x: 0,
-          duration: 1.1,
-          ease: "expo.out",
-          stagger: staggerFor(group),
-          force3D: true,
+          duration: 1.8,
+          ease: "power2.out",
           overwrite: "auto",
           scrollTrigger: {
-            trigger: group[0],
+            trigger: el,
             start: "top 85%",
-            once: true,
+            toggleActions: "play none none none",
             invalidateOnRefresh: true,
           },
         }
