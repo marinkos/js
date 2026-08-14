@@ -31,6 +31,13 @@
     return supportsClamp ? "clamp(" + position + ")" : position;
   }
 
+  // Anything already past its start line on load (hero content, or content
+  // above a restored scroll position) has no scroll left to cross that line,
+  // so it plays straight away instead of waiting for a trigger.
+  function isPastStart(el, startRatio) {
+    return el.getBoundingClientRect().top < window.innerHeight * startRatio;
+  }
+
   function scheduleRefresh() {
     if (refreshQueued) return;
     refreshQueued = true;
@@ -103,6 +110,16 @@
         gsap.set(el, { autoAlpha: 1 });
         gsap.set(split.chars, { opacity: 0.1 });
 
+        if (isPastStart(el, 0.8)) {
+          gsap.to(split.chars, {
+            opacity: 1,
+            duration: 0.5,
+            stagger: 0.02,
+            ease: "none",
+          });
+          return;
+        }
+
         gsap.to(split.chars, {
           opacity: 1,
           stagger: 0.03,
@@ -129,23 +146,24 @@
     }
 
     fadeEls.forEach((el) => {
-      gsap.fromTo(
-        el,
-        { autoAlpha: 0, y: 64 },
-        {
-          autoAlpha: 1,
-          y: 0,
-          duration: 1.1,
-          ease: "power2.out",
-          overwrite: "auto",
-          scrollTrigger: {
-            trigger: el,
-            start: clamp("top 90%"),
-            toggleActions: "play none none none",
-            invalidateOnRefresh: true,
-          },
-        }
-      );
+      const vars = {
+        autoAlpha: 1,
+        y: 0,
+        duration: 1.1,
+        ease: "power2.out",
+        overwrite: "auto",
+      };
+
+      if (!isPastStart(el, 0.9)) {
+        vars.scrollTrigger = {
+          trigger: el,
+          start: clamp("top 90%"),
+          toggleActions: "play none none none",
+          invalidateOnRefresh: true,
+        };
+      }
+
+      gsap.fromTo(el, { autoAlpha: 0, y: 64 }, vars);
     });
   }
 
@@ -159,22 +177,23 @@
     }
 
     slideEls.forEach((el) => {
-      gsap.fromTo(
-        el,
-        { x: "30vw" },
-        {
-          x: 0,
-          duration: 1.8,
-          ease: "power2.out",
-          overwrite: "auto",
-          scrollTrigger: {
-            trigger: el,
-            start: clamp("top 85%"),
-            toggleActions: "play none none none",
-            invalidateOnRefresh: true,
-          },
-        }
-      );
+      const vars = {
+        x: 0,
+        duration: 1.8,
+        ease: "power2.out",
+        overwrite: "auto",
+      };
+
+      if (!isPastStart(el, 0.85)) {
+        vars.scrollTrigger = {
+          trigger: el,
+          start: clamp("top 85%"),
+          toggleActions: "play none none none",
+          invalidateOnRefresh: true,
+        };
+      }
+
+      gsap.fromTo(el, { x: "30vw" }, vars);
     });
   }
 
