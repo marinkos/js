@@ -110,27 +110,24 @@
         gsap.set(el, { autoAlpha: 1 });
         gsap.set(split.chars, { color: "#D6D6D6" });
 
-        if (isPastStart(el, 0.8)) {
-          gsap.to(split.chars, {
-            color: "#0a0a0a",
-            duration: 0.5,
-            stagger: 0.02,
-            ease: "none",
-          });
-          return;
-        }
+        const stagger = 0.03;
+        const tl = gsap.timeline(
+          isPastStart(el, 0.8)
+            ? {}
+            : {
+                scrollTrigger: {
+                  trigger: el,
+                  start: clamp("top 80%"),
+                  end: clamp("top 30%"),
+                  scrub: 0.3,
+                  invalidateOnRefresh: true,
+                },
+              }
+        );
 
-        gsap.to(split.chars, {
-          color: "#0a0a0a",
-          stagger: 0.03,
-          ease: "none",
-          scrollTrigger: {
-            trigger: el,
-            start: clamp("top 80%"),
-            end: clamp("top 30%"),
-            scrub: 0.3,
-            invalidateOnRefresh: true,
-          },
+        // Instant snap per character — scrub only moves the playhead, not the color.
+        split.chars.forEach((char, i) => {
+          tl.set(char, { color: "#0a0a0a" }, i * stagger);
         });
       });
     });
