@@ -85,7 +85,9 @@
     if (reduceMotion) return;
 
     const fadeEls = document.querySelectorAll("[data-fade]");
-    if (fadeEls.length) gsap.set(fadeEls, { autoAlpha: 0, y: 64 });
+    if (fadeEls.length) {
+      gsap.set(fadeEls, { autoAlpha: 0, y: 32, willChange: "transform, opacity" });
+    }
 
     const revealEls = document.querySelectorAll("[data-reveal]");
     if (revealEls.length) gsap.set(revealEls, { autoAlpha: 0, color: "#D6D6D6" });
@@ -148,7 +150,9 @@
         y: 0,
         duration: 1.1,
         ease: "power2.out",
+        force3D: true,
         overwrite: "auto",
+        onComplete: () => gsap.set(el, { clearProps: "willChange" }),
       };
 
       if (!isPastStart(el, 0.9)) {
@@ -160,7 +164,7 @@
         };
       }
 
-      gsap.fromTo(el, { autoAlpha: 0, y: 64 }, vars);
+      gsap.to(el, vars);
     });
   }
 
