@@ -88,7 +88,7 @@
     if (fadeEls.length) gsap.set(fadeEls, { autoAlpha: 0, y: 64 });
 
     const revealEls = document.querySelectorAll("[data-reveal]");
-    if (revealEls.length) gsap.set(revealEls, { autoAlpha: 0 });
+    if (revealEls.length) gsap.set(revealEls, { autoAlpha: 0, color: "#D6D6D6" });
 
     const slideEls = document.querySelectorAll("[data-slide]");
     if (slideEls.length) gsap.set(slideEls, { x: "30vw" });
@@ -99,7 +99,7 @@
     if (!elements.length) return Promise.resolve();
 
     if (reduceMotion) {
-      elements.forEach((el) => gsap.set(el, { autoAlpha: 1 }));
+      elements.forEach((el) => gsap.set(el, { autoAlpha: 1, color: "#0a0a0a" }));
       return Promise.resolve();
     }
 
@@ -108,11 +108,11 @@
         const split = new SplitText(el, { type: "chars, words" });
 
         gsap.set(el, { autoAlpha: 1 });
-        gsap.set(split.chars, { opacity: 0.1 });
+        gsap.set(split.chars, { color: "#D6D6D6" });
 
         if (isPastStart(el, 0.8)) {
           gsap.to(split.chars, {
-            opacity: 1,
+            color: "#0a0a0a",
             duration: 0.5,
             stagger: 0.02,
             ease: "none",
@@ -121,7 +121,7 @@
         }
 
         gsap.to(split.chars, {
-          opacity: 1,
+          color: "#0a0a0a",
           stagger: 0.03,
           ease: "none",
           scrollTrigger: {
