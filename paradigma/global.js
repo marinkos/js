@@ -93,7 +93,7 @@
     if (revealEls.length) gsap.set(revealEls, { autoAlpha: 0, color: "#D6D6D6" });
 
     const slideEls = document.querySelectorAll("[data-slide]");
-    if (slideEls.length) gsap.set(slideEls, { x: "30vw" });
+    if (slideEls.length) gsap.set(slideEls, { x: "15vw", willChange: "transform" });
   }
 
   function initReveal() {
@@ -183,6 +183,8 @@
         duration: 1.8,
         ease: "power2.out",
         overwrite: "auto",
+        force3D: true,
+        onComplete: () => gsap.set(el, { clearProps: "willChange" }),
       };
 
       if (!isPastStart(el, 0.85)) {
@@ -194,7 +196,9 @@
         };
       }
 
-      gsap.fromTo(el, { x: "30vw" }, vars);
+      // Initial x is already set in setInitialState(). This avoids Safari
+      // snapping that can happen when fromTo re-applies start values.
+      gsap.to(el, vars);
     });
   }
 
